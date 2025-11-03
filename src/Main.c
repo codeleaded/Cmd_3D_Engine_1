@@ -1,6 +1,15 @@
 #include <math.h>
-#include "C:\Wichtig\System\Static\Library\ConsoleEngine.h"
-#include "C:\Wichtig\System\Static\Container\Vector.h"
+
+#if defined __linux__
+#include "/home/codeleaded/System/Static/Library/ConsoleEngine.h"
+#include "/home/codeleaded/System/Static/Container/Vector.h"
+#elif defined _WINE
+#include "/home/codeleaded/System/Static/Library/ConsoleEngine.h"
+#include "/home/codeleaded/System/Static/Container/Vector.h"
+#elif defined _WIN32
+#include "F:/home/codeleaded/System/Static/Library/ConsoleEngine.h"
+#include "F:/home/codeleaded/System/Static/Container/Vector.h"
+#endif
 
 typedef struct vec3d{
 	float x, y, z;
