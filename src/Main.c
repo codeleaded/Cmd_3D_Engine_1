@@ -9,6 +9,10 @@
 #elif defined _WIN32
 #include "F:/home/codeleaded/System/Static/Library/ConsoleEngine.h"
 #include "F:/home/codeleaded/System/Static/Container/Vector.h"
+#elif defined(__APPLE__)
+#error "Apple not supported!"
+#else
+#error "Platform not supported!"
 #endif
 
 typedef struct vec3d{
@@ -43,7 +47,7 @@ void MultiplyMatrixVector(vec3d i, vec3d* o, mat4x4 m){
 	}
 }
 
-void Setup(AlxWindow* w){
+void C_Setup(Console* c){
     meshCube.tris = Vector_New(sizeof(triangle));
     
     // SOUTH                                                     
@@ -86,7 +90,7 @@ void Setup(AlxWindow* w){
 	float fNear = 0.1f;
 	float fFar = 1000.0f;
 	float fFov = 90.0f;
-	float fAspectRatio = (float)Console_Height() / (float)Console_Width();
+	float fAspectRatio = (float)Console_Height(c) / (float)Console_Width(c);
 	float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
 	memset(matProj.m[0],0,4 * sizeof(float));
     memset(matProj.m[1],0,4 * sizeof(float));
@@ -99,12 +103,13 @@ void Setup(AlxWindow* w){
 	matProj.m[2][3] = 1.0f;
 	matProj.m[3][3] = 0.0f;
 }
-void Update(float w->ElapsedTime){
+void C_Update(Console* c){
     // Clear Screen
-	Console_Clear(PIXEL_SOLID, FG_BLACK);
+	Console_Clear(c,CPIXEL_SOLID,FG_BLACK);
+	
 	// Set up rotation matrices
 	mat4x4 matRotZ, matRotX;
-	fTheta += 1.0f * w->ElapsedTime;
+	fTheta += 1.0f * c->ElapsedTime;
 	
     // Rotation Z
     memset(matRotZ.m[0],0,4 * sizeof(float));
@@ -117,6 +122,7 @@ void Update(float w->ElapsedTime){
 	matRotZ.m[1][1] = cosf(fTheta);
 	matRotZ.m[2][2] = 1;
 	matRotZ.m[3][3] = 1;
+
 	// Rotation X
     memset(matRotX.m[0],0,4 * sizeof(float));
     memset(matRotX.m[1],0,4 * sizeof(float));
@@ -154,27 +160,31 @@ void Update(float w->ElapsedTime){
 		triProjected.p[0].x += 1.0f; triProjected.p[0].y += 1.0f;
 		triProjected.p[1].x += 1.0f; triProjected.p[1].y += 1.0f;
 		triProjected.p[2].x += 1.0f; triProjected.p[2].y += 1.0f;
-		triProjected.p[0].x *= 0.5f * (float)Console_Width();
-		triProjected.p[0].y *= 0.5f * (float)Console_Height();
-		triProjected.p[1].x *= 0.5f * (float)Console_Width();
-		triProjected.p[1].y *= 0.5f * (float)Console_Height();
-		triProjected.p[2].x *= 0.5f * (float)Console_Width();
-		triProjected.p[2].y *= 0.5f * (float)Console_Height();
+		triProjected.p[0].x *= 0.5f * (float)Console_Width(c);
+		triProjected.p[0].y *= 0.5f * (float)Console_Height(c);
+		triProjected.p[1].x *= 0.5f * (float)Console_Width(c);
+		triProjected.p[1].y *= 0.5f * (float)Console_Height(c);
+		triProjected.p[2].x *= 0.5f * (float)Console_Width(c);
+		triProjected.p[2].y *= 0.5f * (float)Console_Height(c);
 		// Rasterize triangle
-		Console_RenderTriangleWire((Vec2){triProjected.p[0].x,triProjected.p[0].y},
-			                       (Vec2){triProjected.p[1].x,triProjected.p[1].y},
-			                       (Vec2){triProjected.p[2].x,triProjected.p[2].y},
-			                       (Pixel){PIXEL_SOLID, FG_WHITE},1.0f);
+		Console_RenderTriangleWire(
+			c,
+			(Vec2){triProjected.p[0].x,triProjected.p[0].y},
+			(Vec2){triProjected.p[1].x,triProjected.p[1].y},
+			(Vec2){triProjected.p[2].x,triProjected.p[2].y},
+			(CPixel){CPIXEL_SOLID, FG_WHITE},
+			1.0f
+		);
 	}
 }
-void Delete(AlxWindow* w){
+void C_Delete(Console* c){
     Vector_Free(&meshCube.tris);
 }
 
 int main(){
     Console c;
-    if(Console_Create(&c,L"3D Engine",200,150,8,8,Setup,Update,Delete)){
-        Start();
+    if(Console_Create(&c,L"3D Engine",200,150,8,8,C_Setup,C_Update,C_Delete)){
+        Console_Start(&c);
     }
     return 0;
 }
